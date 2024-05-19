@@ -5,4 +5,4 @@ RUN mvn clean package -DskipTests
 FROM openjdk:17.0.1-jdk-slim
 COPY --from=build /target/face-recognition-0.0.1-SNAPSHOT.jar face-recognition.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "face-recognition.jar"]
+ENTRYPOINT [ "java", "-jar", "face-recognition.jar" ]
