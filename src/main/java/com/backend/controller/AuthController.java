@@ -7,6 +7,8 @@ import com.backend.response.AuthResponse;
 import com.backend.security.JwtProvider;
 import com.backend.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -32,26 +34,27 @@ public class AuthController {
     private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
-    public AuthResponse createUserHandler(@RequestBody User user) throws Exception {
+    public ResponseEntity<AuthResponse> createUserHandler(@RequestBody User user) throws Exception {
         User isExist = userDao.findByEmail(user.getEmail());
         if(isExist!=null) {
-            throw new Exception("email already used with another account");
+            AuthResponse res = new AuthResponse(null, "User already exist");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(res);
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User savedUser = userDao.save(user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getEmail(), savedUser.getPassword());
         String token = JwtProvider.generateToken(authentication);
         AuthResponse res = new AuthResponse(token, "Registered successfully");
-        return res;
+        return ResponseEntity.ok(res);
     }
 
 
     @PostMapping("signin")
-    public AuthResponse loginUserHandler(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<AuthResponse> loginUserHandler(@RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-        String token = JwtProvider.generateToken(authentication);
-        AuthResponse res = new AuthResponse(token, "login successfull");
-        return res;
+            String token = JwtProvider.generateToken(authentication);
+            AuthResponse res = new AuthResponse(token, "login successfull");
+            return ResponseEntity.ok(res);
     }
 
 
