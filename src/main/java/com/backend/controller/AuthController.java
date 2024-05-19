@@ -61,7 +61,7 @@ public class AuthController {
     private Authentication authenticate(String email, String password) {
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
         if(userDetails==null) {
-            throw new BadCredentialsException("invalid username");
+            throw new BadCredentialsException("username does not exist!");
         }
         if(!passwordEncoder.matches(password, userDetails.getPassword())) {
             throw new BadCredentialsException("wrong password");
