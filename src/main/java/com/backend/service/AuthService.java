@@ -43,8 +43,7 @@ public class AuthService {
 			HashMap<String, Object> map = new HashMap<>();
 			map.put("status", "failed");
         	map.put("message", "User already exist");
-            AuthResponse res = new AuthResponse(null, map);
-            return res;
+            return new AuthResponse(null, map);
 		}
 		user.setId(UUID.randomUUID().toString());
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -59,19 +58,24 @@ public class AuthService {
         	Files.copy(image.getInputStream(), Paths.get(filePath));
         	user.setProfile_url(fileName);
 		}
-		if(user.getRole().equals("admin")) {
-			user.setRole("ROLE_ADMIN");
+		if(user.getRole().equalsIgnoreCase("admin")){
+			user.setRole("ADMIN");
 		}else {
-			user.setRole("ROLE_USER");
+			user.setRole("USER");
 		}
 		savedUser = userRepository.save(user);
 		Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getEmail(), savedUser.getPassword());
         String token = JwtProvider.generateToken(authentication);
         HashMap<String, Object> map = new HashMap<>();
     	map.put("message", "Registered successfully");
-    	map.put("status", "success");
-        AuthResponse res = new AuthResponse(token, map);
-        return res;
+		map.put("status", "success");
+		User loggedInUser = new User();
+		loggedInUser.setEmail(user.getEmail());
+		loggedInUser.setName(user.getEmail());
+		loggedInUser.setProfile_url(user.getProfile_url());
+		loggedInUser.setRole(user.getRole());
+		map.put("user", loggedInUser);
+        return new AuthResponse(token, map);
 	}
 	
 	
@@ -88,8 +92,7 @@ public class AuthService {
         loggedInUser.setProfile_url(savedUser.getProfile_url());
         loggedInUser.setRole(savedUser.getRole());
         map.put("user", loggedInUser);
-        AuthResponse res = new AuthResponse(token, map);
-        return res;
+        return new AuthResponse(token, map);
 	}
 	
 	
