@@ -1,25 +1,21 @@
 package com.backend.response;
 
+import java.util.HashMap;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class AuthResponse {
     private String token;
-    private String message;
-    public AuthResponse(String token, String message) {
+    private HashMap<String, Object> payload;
+    public AuthResponse(String token, HashMap<String, Object> payload) {
         super();
         this.token = token;
-        this.message = message;
+        this.payload = payload;
     }
-    public String getToken() {
-        return token;
-    }
-    public void setToken(String token) {
-        this.token = token;
-    }
-    public String getMessage() {
-        return message;
-    }
-    public void setMessage(String message) {
-        this.message = message;
-    }
+
     public AuthResponse() {
         super();
         // TODO Auto-generated constructor stub
