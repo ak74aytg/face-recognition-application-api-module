@@ -25,7 +25,7 @@ public class AuthController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping("/signup")
+    @PostMapping("signup")
     public ResponseEntity<AuthResponse> createUserHandler(@RequestParam("user") String userJson, @RequestParam("profile-image") MultipartFile file) throws Exception {
     	ObjectMapper objectMapper = new ObjectMapper();
         User user = objectMapper.readValue(userJson, User.class);
