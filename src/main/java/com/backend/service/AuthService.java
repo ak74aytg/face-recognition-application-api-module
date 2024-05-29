@@ -88,7 +88,7 @@ public class AuthService {
         map.put("message", "login successfull");
         User loggedInUser = new User();
         loggedInUser.setEmail(savedUser.getEmail());
-        loggedInUser.setName(savedUser.getEmail());
+        loggedInUser.setName(savedUser.getName());
         loggedInUser.setProfile_url(savedUser.getProfile_url());
         loggedInUser.setRole(savedUser.getRole());
         map.put("user", loggedInUser);
