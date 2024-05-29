@@ -26,10 +26,15 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("signup")
-    public ResponseEntity<AuthResponse> createUserHandler(@RequestParam("user") String userJson, @RequestParam("profile-image") MultipartFile file) throws Exception {
+    public ResponseEntity<AuthResponse> createUserHandler(@RequestParam("user") String userJson, @RequestParam(value = "profile-image", required = false) MultipartFile file) throws Exception {
     	ObjectMapper objectMapper = new ObjectMapper();
         User user = objectMapper.readValue(userJson, User.class);
-    	AuthResponse response = authService.RegisterUser(user, file);
+        AuthResponse response;
+        if (file != null && !file.isEmpty()) {
+            response = authService.RegisterUser(user, file);
+        } else {
+            response = authService.RegisterUser(user, null);
+        }
         String status = (String) response.getPayload().get("status");
         if(status.equals("failed")) {
         	return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
