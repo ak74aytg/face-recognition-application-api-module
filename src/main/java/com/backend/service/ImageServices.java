@@ -82,8 +82,12 @@ public class ImageServices {
 
         String FILE_NAME = imageData.getImageUrl();
         Path loc = Paths.get(path+File.separator+FILE_NAME);
-        Files.delete(loc);
-        System.out.println("photo is deleted");
+        try {
+            Files.deleteIfExists(loc);
+            System.out.println("Photo is deleted");
+        } catch (Exception e) {
+            System.out.println("Error deleting photo: " + e.getMessage());
+        }
         imageRepository.delete(imageData);
         return "image deleted succesfully";
     }
