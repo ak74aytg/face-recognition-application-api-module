@@ -70,6 +70,7 @@ public class AuthService {
     	map.put("message", "Registered successfully");
 		map.put("status", "success");
 		User loggedInUser = new User();
+		loggedInUser.setId(user.getId());
 		loggedInUser.setEmail(user.getEmail());
 		loggedInUser.setName(user.getEmail());
 		loggedInUser.setProfile_url(user.getProfile_url());
@@ -87,6 +88,7 @@ public class AuthService {
         HashMap<String, Object> map = new HashMap<>();
         map.put("message", "login successfull");
         User loggedInUser = new User();
+		loggedInUser.setId(savedUser.getId());
         loggedInUser.setEmail(savedUser.getEmail());
         loggedInUser.setName(savedUser.getName());
         loggedInUser.setProfile_url(savedUser.getProfile_url());

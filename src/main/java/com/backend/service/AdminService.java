@@ -25,7 +25,7 @@ public class AdminService {
     public String Home(Principal principal) throws Exception{
         User user = userRepository.findByEmail(principal.getName());
         if(user==null){
-            throw new BadCredentialsException("no are not allowed to access this api!");
+            throw new BadCredentialsException("you are not allowed to access this api!");
         }
         if(!user.getRole().equals("ADMIN")){
             throw new BadCredentialsException("no are not allowed to access this api!");
