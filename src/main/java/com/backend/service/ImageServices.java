@@ -17,6 +17,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.Principal;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -69,14 +70,16 @@ public class ImageServices {
         }
         ImageData imageData = OptionalImageData.get();
 
-        boolean flag = false;
-        for(ImageData img : user.getSavedImages()){
-            if(img.getId().equals(imageId)){
-                user.getSavedImages().remove(img);
-                flag=true;
+        Iterator<ImageData> iterator = user.getSavedImages().iterator();
+        boolean found = false;
+        while (iterator.hasNext()) {
+            ImageData img = iterator.next();
+            if (img.getId().equals(imageId)) {
+                iterator.remove(); // Remove the element from the list
+                found = true;
             }
         }
-        if(!flag){
+        if(!found){
             throw new RuntimeException("You do not have image data with given id!");
         }
 
