@@ -1,97 +1,76 @@
 package com.backend.service;
 
+
+
 import com.backend.models.ImageData;
 import com.backend.models.User;
 import com.backend.repository.ImageDataRepository;
 import com.backend.repository.UserRepository;
-import com.backend.response.AuthResponse;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Principal;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class ImageServices {
-    @Value("${project.image}")
-    private String path;
+    @Autowired
+    Cloudinary cloudinary; // Inject Cloudinary bean
+
     @Autowired
     ImageDataRepository imageRepository;
+
     @Autowired
     UserRepository userRepository;
 
-    public String SaveImages(Principal principal, ImageData imageData, MultipartFile image) throws IOException {
+    public String saveImage(Principal principal, ImageData imageData, MultipartFile image) throws IOException {
         User user = userRepository.findByEmail(principal.getName());
-        if(user==null){
-            throw new BadCredentialsException("you are not allowed to access this api!");
+        if (user == null) {
+            throw new BadCredentialsException("You are not allowed to access this API!");
         }
+
         imageData.setId(UUID.randomUUID().toString());
-        String fileName = imageData.getId()+"_"+imageData.getName()+"_"+image.getOriginalFilename();
-        String filePath = path+ File.separator+fileName;
-        File f = new File(path);
-        if(!f.exists()) {
-            f.mkdir();
-        }
-        Files.copy(image.getInputStream(), Paths.get(filePath));
-        imageData.setImageUrl(fileName);
+
+        // Upload image to Cloudinary
+        Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+
+        // Save image URL and other data
+        imageData.setImageUrl((String) uploadResult.get("secure_url")); // Use secure URL for HTTPS
         user.getSavedImages().add(imageData);
         userRepository.save(user);
         imageRepository.save(imageData);
-        return "saved successfully";
+        return "Saved successfully";
     }
 
     public List<ImageData> getImages(Principal principal) {
         User user = userRepository.findByEmail(principal.getName());
-        if(user==null){
-            throw new BadCredentialsException("you are not allowed to access this api!");
+        if (user == null) {
+            throw new BadCredentialsException("You are not allowed to access this API!");
         }
         return user.getSavedImages();
     }
 
     public String deleteImage(String imageId, Principal principal) throws IOException {
-        User user = userRepository.findByEmail(principal.getName());
-        if(user==null){
-            throw new BadCredentialsException("you are not allowed to access this api!");
-        }
+        // Fetch image data from repository
         Optional<ImageData> OptionalImageData = imageRepository.findById(imageId);
         if(OptionalImageData.isEmpty()){
             throw new BadCredentialsException("imageData does not exist!");
         }
         ImageData imageData = OptionalImageData.get();
 
-        Iterator<ImageData> iterator = user.getSavedImages().iterator();
-        boolean found = false;
-        while (iterator.hasNext()) {
-            ImageData img = iterator.next();
-            if (img.getId().equals(imageId)) {
-                iterator.remove(); // Remove the element from the list
-                found = true;
-            }
-        }
-        if(!found){
-            throw new RuntimeException("You do not have image data with given id!");
-        }
+        // Delete the image from Cloudinary
+        Map<String, String> options = new HashMap<>();
+        options.put("invalidate", "true"); // Ensures the CDN cache is invalidated
+        cloudinary.uploader().destroy(imageData.getImageUrl(), options);
 
-        String FILE_NAME = imageData.getImageUrl();
-        Path loc = Paths.get(path+File.separator+FILE_NAME);
-        try {
-            Files.deleteIfExists(loc);
-            System.out.println("Photo is deleted");
-        } catch (Exception e) {
-            System.out.println("Error deleting photo: " + e.getMessage());
-        }
+        // Delete the image data from the repository
         imageRepository.delete(imageData);
-        return "image deleted succesfully";
+
+        return "image deleted successfully";
     }
 }

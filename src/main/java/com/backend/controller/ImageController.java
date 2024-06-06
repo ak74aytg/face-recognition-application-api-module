@@ -39,26 +39,26 @@ public class ImageController {
 
 
     @PostMapping("/add-image")
-    public String addImages(Principal principal, @RequestParam("name") String name, @RequestParam(value = "image") MultipartFile file) throws Exception{
+    public ResponseEntity<String> addImages(Principal principal, @RequestParam("name") String name, @RequestParam(value = "image") MultipartFile file) throws Exception {
         ImageData imageData = new ImageData();
         imageData.setName(name);
-        String response;
         if (file == null || file.isEmpty()) {
-            throw new IllegalAccessException("no image found");
+            throw new IllegalAccessException("No image found");
         }
-        response = imageServices.SaveImages(principal, imageData, file);
-
-        return response;
+        String response = imageServices.saveImage(principal, imageData, file);
+        return ResponseEntity.ok(response);
     }
 
 
     @GetMapping("/user/images")
-    public List<ImageData> getImages(Principal principal) throws Exception{
-        return imageServices.getImages(principal);
+    public ResponseEntity<List<ImageData>> getImages(Principal principal) throws Exception {
+        List<ImageData> images = imageServices.getImages(principal);
+        return ResponseEntity.ok(images);
     }
 
     @GetMapping("/user/images/delete/{imageId}")
-    public String deleteImage(@PathVariable("imageId") String imageId, Principal principal) throws Exception{
-        return imageServices.deleteImage(imageId, principal);
+    public ResponseEntity<String> deleteImage(@PathVariable("imageId") String imageId, Principal principal) throws Exception {
+        String message = imageServices.deleteImage(imageId, principal);
+        return ResponseEntity.ok(message);
     }
 }
