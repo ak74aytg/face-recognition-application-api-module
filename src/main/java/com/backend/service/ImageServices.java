@@ -7,6 +7,7 @@ import com.backend.models.User;
 import com.backend.repository.ImageDataRepository;
 import com.backend.repository.UserRepository;
 import com.cloudinary.Cloudinary;
+import com.cloudinary.api.ApiResponse;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -62,11 +63,21 @@ public class ImageServices {
             throw new BadCredentialsException("imageData does not exist!");
         }
         ImageData imageData = OptionalImageData.get();
+        String url = imageData.getImageUrl();
+        int lastDotIndex = url.lastIndexOf('.');
+        int lastSlashIndex = url.lastIndexOf('/');
+        String imageName = url.substring(lastSlashIndex + 1, lastDotIndex);
 
-        // Delete the image from Cloudinary
-        Map<String, String> options = new HashMap<>();
-        options.put("invalidate", "true"); // Ensures the CDN cache is invalidated
-        cloudinary.uploader().destroy(imageData.getImageUrl(), options);
+        try {
+            ApiResponse apiResponse = cloudinary.api().deleteResources(Collections.singletonList(imageName),
+                    ObjectUtils.asMap("type", "upload", "resource_type", "image"));
+            System.out.println(apiResponse);
+        } catch (IOException exception) {
+            System.out.println(exception.getMessage());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
 
         // Delete the image data from the repository
         imageRepository.delete(imageData);

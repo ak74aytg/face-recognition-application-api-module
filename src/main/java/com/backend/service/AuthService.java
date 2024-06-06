@@ -5,8 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -25,7 +28,9 @@ import com.backend.security.JwtProvider;
 
 @Service
 public class AuthService {
-	
+
+	@Autowired
+	Cloudinary cloudinary;
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
@@ -48,15 +53,10 @@ public class AuthService {
 		user.setId(UUID.randomUUID().toString());
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		if(image!=null && !image.isEmpty()) {
-			String formattedDateTime = LocalDateTime.now().toString().replace(':', '_');
-			String fileName = user.getId()+"_"+formattedDateTime+"_"+image.getOriginalFilename();
-        	String filePath = path+File.separator+fileName;
-        	File f = new File(path);
-        	if(!f.exists()) {
-        		f.mkdir();
-        	}
-        	Files.copy(image.getInputStream(), Paths.get(filePath));
-        	user.setProfile_url(fileName);
+			Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+
+			// Save image URL and other data
+			user.setProfile_url((String) uploadResult.get("secure_url")); // Use secure URL for HTTPS
 		}
 		if(user.getRole().equalsIgnoreCase("admin")){
 			user.setRole("ADMIN");
