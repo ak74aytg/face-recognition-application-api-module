@@ -38,7 +38,10 @@ public class ImageServices {
         imageData.setId(UUID.randomUUID().toString());
 
         // Upload image to Cloudinary
-        Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
+        Map options = ObjectUtils.asMap(
+                "folder", "saved-images/"
+        );
+        Map uploadResult = cloudinary.uploader().upload(image.getBytes(), options);
 
         // Save image URL and other data
         imageData.setImageUrl((String) uploadResult.get("secure_url")); // Use secure URL for HTTPS
@@ -69,7 +72,8 @@ public class ImageServices {
         String imageName = url.substring(lastSlashIndex + 1, lastDotIndex);
 
         try {
-            ApiResponse apiResponse = cloudinary.api().deleteResources(Collections.singletonList(imageName),
+            ApiResponse apiResponse = cloudinary.api()
+                    .deleteResources(Collections.singletonList("saved-images/"+imageName),
                     ObjectUtils.asMap("type", "upload", "resource_type", "image"));
             System.out.println(apiResponse);
         } catch (IOException exception) {

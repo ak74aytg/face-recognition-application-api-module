@@ -53,8 +53,10 @@ public class AuthService {
 		user.setId(UUID.randomUUID().toString());
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
 		if(image!=null && !image.isEmpty()) {
-			Map uploadResult = cloudinary.uploader().upload(image.getBytes(), ObjectUtils.emptyMap());
-
+			Map options = ObjectUtils.asMap(
+					"folder", "profile-images"
+			);
+			Map uploadResult = cloudinary.uploader().upload(image.getBytes(), options);
 			// Save image URL and other data
 			user.setProfile_url((String) uploadResult.get("secure_url")); // Use secure URL for HTTPS
 		}
