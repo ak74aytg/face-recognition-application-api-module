@@ -17,10 +17,12 @@ public class PublicService {
     ImageDataRepository imageRepository;
     @Autowired
     UserRepository userRepository;
+    @Autowired
+    NotificationService notificationService;
 
     public List<User> verifyImage(MultipartFile image, ImageRequest imageRequest) throws Exception{
         String loc = imageRequest.getLocation();
-        List<User> users = userRepository.findByLocation(loc);
-        return users;
+        notificationService.sendNotification(loc, "New image uploaded in your residential location!");
+        return userRepository.findByLocation(loc);
     }
 }
