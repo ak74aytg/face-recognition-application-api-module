@@ -1,5 +1,6 @@
 package com.backend.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -22,8 +23,9 @@ public class User {
     String name;
     String email;
     String password;
-    String role;
+    String location;
     String profile_url;
     @DBRef
+    @JsonIgnore
     private List<ImageData> savedImages = new ArrayList<>();
 }

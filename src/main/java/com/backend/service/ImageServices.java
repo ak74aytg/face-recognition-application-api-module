@@ -35,8 +35,7 @@ public class ImageServices {
             throw new BadCredentialsException("You are not allowed to access this API!");
         }
 
-        imageData.setId(UUID.randomUUID().toString());
-
+        imageData.setId(UUID.randomUUID().toString());  // Ensure the ID is null so MongoDB will generate a new one
         // Upload image to Cloudinary
         Map options = ObjectUtils.asMap(
                 "folder", "saved-images/"
@@ -46,6 +45,7 @@ public class ImageServices {
         // Save image URL and other data
         imageData.setImageUrl((String) uploadResult.get("secure_url")); // Use secure URL for HTTPS
         user.getSavedImages().add(imageData);
+        imageData.setUser(user);
         userRepository.save(user);
         imageRepository.save(imageData);
         return "Saved successfully";
@@ -56,16 +56,34 @@ public class ImageServices {
         if (user == null) {
             throw new BadCredentialsException("You are not allowed to access this API!");
         }
+
         return user.getSavedImages();
     }
 
     public String deleteImage(String imageId, Principal principal) throws IOException {
         // Fetch image data from repository
+        User user = userRepository.findByEmail(principal.getName());
         Optional<ImageData> OptionalImageData = imageRepository.findById(imageId);
         if(OptionalImageData.isEmpty()){
             throw new BadCredentialsException("imageData does not exist!");
         }
+
         ImageData imageData = OptionalImageData.get();
+        Iterator<ImageData> iterator = user.getSavedImages().iterator();
+        boolean found = false;
+        while (iterator.hasNext()) {
+            ImageData img = iterator.next();
+            if (img.getId().equals(imageId)) {
+                iterator.remove(); // Remove the element from the list
+                found = true;
+            }
+        }
+
+
+        if (!found) {
+            throw new RuntimeException("You do not have image data with the given ID!");
+        }
+
         String url = imageData.getImageUrl();
         int lastDotIndex = url.lastIndexOf('.');
         int lastSlashIndex = url.lastIndexOf('/');

@@ -20,28 +20,21 @@ import java.security.Principal;
 import java.util.List;
 
 @RestController
+@RequestMapping("/user")
 public class ImageController {
-    @Value("${project.image}")
-    String path;
     @Autowired
     ImageServices imageServices;
 
-    @GetMapping(value = "/images/{imageName}", produces = MediaType.IMAGE_JPEG_VALUE)
-    public void downloadImage(
-            @PathVariable("imageName") String imageName,
-            HttpServletResponse response
-    ) throws IOException {
-        String fullPath = path+ File.separator+imageName;
-        InputStream resource = new FileInputStream(fullPath);
-        response.setContentType(MediaType.IMAGE_JPEG_VALUE);
-        StreamUtils.copy(resource, response.getOutputStream());
-    }
 
-
-    @PostMapping("/add-image")
-    public ResponseEntity<String> addImages(Principal principal, @RequestParam("name") String name, @RequestParam(value = "image") MultipartFile file) throws Exception {
+    @PostMapping("/image")
+    public ResponseEntity<String> addImages(Principal principal,
+                                            @RequestParam("guardian") String guardian,
+                                            @RequestParam("location") String location,
+                                            @RequestParam("image") MultipartFile file)
+            throws Exception {
         ImageData imageData = new ImageData();
-        imageData.setName(name);
+        imageData.setGuardian(guardian);
+        imageData.setLocation(location);
         if (file == null || file.isEmpty()) {
             throw new IllegalAccessException("No image found");
         }
@@ -50,13 +43,13 @@ public class ImageController {
     }
 
 
-    @GetMapping("/user/images")
+    @GetMapping("/images")
     public ResponseEntity<List<ImageData>> getImages(Principal principal) throws Exception {
         List<ImageData> images = imageServices.getImages(principal);
         return ResponseEntity.ok(images);
     }
 
-    @GetMapping("/user/images/delete/{imageId}")
+    @GetMapping("/images/delete/{imageId}")
     public ResponseEntity<String> deleteImage(@PathVariable("imageId") String imageId, Principal principal) throws Exception {
         String message = imageServices.deleteImage(imageId, principal);
         return ResponseEntity.ok(message);

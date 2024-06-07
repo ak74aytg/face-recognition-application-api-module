@@ -37,8 +37,6 @@ public class AuthService {
 	private CustomUserDetailsService customUserDetailsService;
 	@Autowired
 	private PasswordEncoder passwordEncoder;
-	@Value("${project.image}")
-	private String path;
 	
 	
 	
@@ -60,11 +58,6 @@ public class AuthService {
 			// Save image URL and other data
 			user.setProfile_url((String) uploadResult.get("secure_url")); // Use secure URL for HTTPS
 		}
-		if(user.getRole().equalsIgnoreCase("admin")){
-			user.setRole("ADMIN");
-		}else {
-			user.setRole("USER");
-		}
 		savedUser = userRepository.save(user);
 		Authentication authentication = new UsernamePasswordAuthenticationToken(savedUser.getEmail(), savedUser.getPassword());
         String token = JwtProvider.generateToken(authentication);
@@ -76,7 +69,6 @@ public class AuthService {
 		loggedInUser.setEmail(user.getEmail());
 		loggedInUser.setName(user.getEmail());
 		loggedInUser.setProfile_url(user.getProfile_url());
-		loggedInUser.setRole(user.getRole());
 		map.put("user", loggedInUser);
         return new AuthResponse(token, map);
 	}
@@ -94,7 +86,6 @@ public class AuthService {
         loggedInUser.setEmail(savedUser.getEmail());
         loggedInUser.setName(savedUser.getName());
         loggedInUser.setProfile_url(savedUser.getProfile_url());
-        loggedInUser.setRole(savedUser.getRole());
         map.put("user", loggedInUser);
         return new AuthResponse(token, map);
 	}

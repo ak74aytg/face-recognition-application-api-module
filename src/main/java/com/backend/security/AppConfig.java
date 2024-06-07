@@ -27,7 +27,8 @@ public class AppConfig {
                         management -> management.sessionCreationPolicy(
                                 SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(Authorize -> Authorize
-                		.requestMatchers("/api/v1/").authenticated()
+                		.requestMatchers("/user/**").authenticated()
+                        .requestMatchers("/admin/**").authenticated()
                         .anyRequest().permitAll())
                 .addFilterBefore(new JwtValidator(), BasicAuthenticationFilter.class)
                 .csrf(csrf -> csrf.disable())
