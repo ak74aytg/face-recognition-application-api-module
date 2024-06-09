@@ -1,5 +1,6 @@
 package com.backend.controller;
 
+import com.backend.models.User;
 import com.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +15,8 @@ public class UserController {
     UserService userService;
 
     @GetMapping("/")
-    public String home(){
-        return "hello user";
+    public User home(Principal principal){
+        return userService.getCurrentUser(principal);
     }
 
     @PostMapping("/location/edit")

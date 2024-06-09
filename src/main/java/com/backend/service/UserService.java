@@ -18,4 +18,8 @@ public class UserService {
         userRepository.save(user);
         return "location updated successfully";
     }
+
+    public User getCurrentUser(Principal principal) {
+        return userRepository.findByEmail(principal.getName());
+    }
 }
