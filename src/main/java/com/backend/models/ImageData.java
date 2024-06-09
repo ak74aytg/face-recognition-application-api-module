@@ -21,6 +21,7 @@ public class ImageData {
     private String imageUrl;
     private String guardian;
     private String location;
+    private Integer mobile;
     @DBRef
     private User user;
 }

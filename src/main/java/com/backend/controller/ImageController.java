@@ -30,11 +30,13 @@ public class ImageController {
     public ResponseEntity<String> addImages(Principal principal,
                                             @RequestParam("guardian") String guardian,
                                             @RequestParam("location") String location,
+                                            @RequestParam("mobile") Integer mobile,
                                             @RequestParam("image") MultipartFile file)
             throws Exception {
         ImageData imageData = new ImageData();
         imageData.setGuardian(guardian);
         imageData.setLocation(location);
+        imageData.setMobile(mobile);
         if (file == null || file.isEmpty()) {
             throw new IllegalAccessException("No image found");
         }
