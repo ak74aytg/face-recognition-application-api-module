@@ -24,6 +24,7 @@ public class User {
     String email;
     String password;
     String location;
+    Integer pincode;
     String profile_url;
     @DBRef
     @JsonIgnore

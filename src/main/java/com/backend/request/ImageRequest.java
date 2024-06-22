@@ -11,5 +11,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class ImageRequest {
     private String location;
+    private Integer pin;
     private String image;
 }

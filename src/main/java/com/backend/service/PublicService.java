@@ -20,9 +20,9 @@ public class PublicService {
     @Autowired
     NotificationService notificationService;
 
-    public List<User> verifyImage(MultipartFile image, ImageRequest imageRequest) throws Exception{
+    public void verifyImage(MultipartFile image, ImageRequest imageRequest) throws Exception{
         String loc = imageRequest.getLocation();
-        notificationService.sendNotification(loc, "New image uploaded in your residential location!");
-        return userRepository.findByLocation(loc);
+        Integer pin = imageRequest.getPin();
+        notificationService.sendNotification(loc, pin, "New image uploaded in your nearby location!");
     }
 }

@@ -19,10 +19,12 @@ public class PublicController {
     PublicService publicService;
 
     @PostMapping("send/image")
-    public List<User> sendImage(@RequestParam("location") String location,
+    public void sendImage(@RequestParam("location") String location,
+                                @RequestParam("pincode") Integer pincode,
                                 @RequestParam("image") MultipartFile file) throws Exception{
         ImageRequest imageRequest = new ImageRequest();
         imageRequest.setLocation(location);
-        return publicService.verifyImage(file, imageRequest);
+        imageRequest.setPin(pincode);
+        publicService.verifyImage(file, imageRequest);
     }
 }

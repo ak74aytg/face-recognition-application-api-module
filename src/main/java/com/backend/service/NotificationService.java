@@ -18,10 +18,15 @@ public class NotificationService {
     @Autowired
     private NotificationController notificationController;
 
-    public void sendNotification(String location, String message) {
+    public void sendNotification(String location,Integer pincode, String message) {
         List<User> users = userRepository.findByLocation(location);
+        for(int i=pincode-3;i<pincode+4;i++) {
+            users.addAll(userRepository.findByPincode(i));
+        }
         for (User user : users) {
             notificationController.sendNotificationToUser(user.getEmail(), message);
+            System.out.println(user.getEmail());
         }
+        notificationController.sendNotificationToUser("admin", "new image uploaded in location "+location);
     }
 }
