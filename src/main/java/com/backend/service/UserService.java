@@ -12,9 +12,10 @@ public class UserService {
     @Autowired
     UserRepository userRepository;
 
-    public String editLocation(Principal principal, String location){
+    public String editLocation(Principal principal, String location, Integer pincode){
         User user = userRepository.findByEmail(principal.getName());
-        user.setLocation(location);
+        if(location!=null) user.setLocation(location);
+        if(pincode!=null) user.setPincode(pincode);
         userRepository.save(user);
         return "location updated successfully";
     }

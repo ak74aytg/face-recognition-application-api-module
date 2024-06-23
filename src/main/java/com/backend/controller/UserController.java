@@ -20,7 +20,7 @@ public class UserController {
     }
 
     @PostMapping("/location/edit")
-    public String edit(Principal principal, @RequestParam("location") String location){
-        return userService.editLocation(principal, location);
+    public String edit(Principal principal,@RequestParam(value = "pincode", required = false) Integer pincode, @RequestParam(value = "location", required = false) String location){
+        return userService.editLocation(principal, location, pincode);
     }
 }
