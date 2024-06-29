@@ -23,4 +23,9 @@ public class UserController {
     public String edit(Principal principal,@RequestParam(value = "pincode", required = false) Integer pincode, @RequestParam(value = "location", required = false) String location){
         return userService.editLocation(principal, location, pincode);
     }
+
+    @PostMapping("/token/edit")
+    public String editToken(@RequestParam("token") String token, Principal principal){
+        return userService.editToken(token, principal);
+    }
 }

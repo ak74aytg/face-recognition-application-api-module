@@ -23,4 +23,11 @@ public class UserService {
     public User getCurrentUser(Principal principal) {
         return userRepository.findByEmail(principal.getName());
     }
+
+    public String editToken(String token, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName());
+        user.setToken(token);
+        userRepository.save(user);
+        return "Token updated successfully";
+    }
 }

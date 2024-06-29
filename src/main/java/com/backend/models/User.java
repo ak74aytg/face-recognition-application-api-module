@@ -26,6 +26,7 @@ public class User {
     String location;
     Integer pincode;
     String profile_url;
+    String token;
     @DBRef
     @JsonIgnore
     private List<ImageData> savedImages = new ArrayList<>();
