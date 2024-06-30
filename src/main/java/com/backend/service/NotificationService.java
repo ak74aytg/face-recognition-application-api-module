@@ -4,8 +4,6 @@ import com.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.ServiceAccountCredentials;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.messaging.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -13,12 +11,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -27,7 +23,7 @@ import java.util.Set;
 
 @Service
 public class NotificationService {
-    private static final String FCM_PROJECT_NAME = "notification-e33f2";
+    private static final String FCM_PROJECT_NAME = System.getenv("FCM_PROJECT_ID");
 
 
     @Autowired
@@ -58,14 +54,28 @@ public class NotificationService {
     }
 
     private String getAccessToken() throws IOException {
-        try (FileInputStream serviceAccountStream = new FileInputStream("src/main/resources/fcm.json")) {
-            GoogleCredentials googleCredentials = ServiceAccountCredentials.fromStream(serviceAccountStream)
-                    .createScoped("https://www.googleapis.com/auth/cloud-platform");
-            googleCredentials.refreshIfExpired();
-            return googleCredentials.getAccessToken().getTokenValue();
-        } catch (Exception e) {
-            throw new IOException("Error getting access token: " + e.getMessage(), e);
-        }
+        String privateKey = System.getenv("FCM_PRIVATE_KEY");
+        String clientEmail = System.getenv("FCM_CLIENT_EMAIL");
+        String projectId = System.getenv("FCM_PROJECT_ID");
+
+
+        GoogleCredentials googleCredentials = GoogleCredentials.fromStream(new ByteArrayInputStream((
+                "{\n" +
+                        "  \"type\": \"service_account\",\n" +
+                        "  \"project_id\": \"" + projectId + "\",\n" +
+                        "  \"private_key_id\": \"5bd391741defe3134bc847ddfe4b7f85dfbe7285\",\n" +
+                        "  \"private_key\": \"" + privateKey + "\",\n" +
+                        "  \"client_email\": \"" + clientEmail + "\",\n" +
+                        "  \"client_id\": \"104283623904123740123\",\n" +
+                        "  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n" +
+                        "  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n" +
+                        "  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n" +
+                        "  \"client_x509_cert_url\": \"https://www.googleapis.com/robot/v1/metadata/x509/" + clientEmail + "\",\n" +
+                        "  \"universe_domain\": \"googleapis.com\"\n" +
+                        "}")
+                .getBytes())).createScoped("https://www.googleapis.com/auth/cloud-platform");
+        googleCredentials.refreshIfExpired();
+        return googleCredentials.getAccessToken().getTokenValue();
     }
 
 
