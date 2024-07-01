@@ -31,7 +31,7 @@ public class NotificationService {
 
     public void sendNotification(String location, Integer pincode, String message) throws IOException, FirebaseMessagingException {
         Set<User> users = new HashSet<>(userRepository.findByLocation(location));
-        for (int i = pincode - 3; i < pincode + 4; i++) {
+        for (int i = pincode - 6; i < pincode + 7; i++) {
             users.addAll(userRepository.findByPincode(i));
         }
 
