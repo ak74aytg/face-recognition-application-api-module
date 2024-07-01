@@ -69,6 +69,9 @@ public class AuthService {
 		loggedInUser.setEmail(user.getEmail());
 		loggedInUser.setName(user.getEmail());
 		loggedInUser.setProfile_url(user.getProfile_url());
+		loggedInUser.setPincode(user.getPincode());
+		loggedInUser.setLocation(user.getLocation());
+		loggedInUser.setToken(user.getToken());
 		map.put("user", loggedInUser);
         return new AuthResponse(token, map);
 	}
@@ -86,6 +89,9 @@ public class AuthService {
         loggedInUser.setEmail(savedUser.getEmail());
         loggedInUser.setName(savedUser.getName());
         loggedInUser.setProfile_url(savedUser.getProfile_url());
+		loggedInUser.setToken(savedUser.getToken());
+		loggedInUser.setLocation(savedUser.getLocation());
+		loggedInUser.setPincode(savedUser.getPincode());
         map.put("user", loggedInUser);
         return new AuthResponse(token, map);
 	}
