@@ -57,16 +57,17 @@ public class NotificationService {
         String privateKey = System.getenv("FCM_PRIVATE_KEY");
         String clientEmail = System.getenv("FCM_CLIENT_EMAIL");
         String projectId = System.getenv("FCM_PROJECT_ID");
-
+        String privateKeyId = System.getenv("FCM_PRIVATE_KEY_ID");
+        String clientId = System.getenv("FCM_CLIENT_ID");
 
         GoogleCredentials googleCredentials = GoogleCredentials.fromStream(new ByteArrayInputStream((
                 "{\n" +
                         "  \"type\": \"service_account\",\n" +
                         "  \"project_id\": \"" + projectId + "\",\n" +
-                        "  \"private_key_id\": \"5bd391741defe3134bc847ddfe4b7f85dfbe7285\",\n" +
+                        "  \"private_key_id\": \"" + privateKeyId + "\",\n" +
                         "  \"private_key\": \"" + privateKey + "\",\n" +
                         "  \"client_email\": \"" + clientEmail + "\",\n" +
-                        "  \"client_id\": \"104283623904123740123\",\n" +
+                        "  \"client_id\": \"" + clientId + "\",\n" +
                         "  \"auth_uri\": \"https://accounts.google.com/o/oauth2/auth\",\n" +
                         "  \"token_uri\": \"https://oauth2.googleapis.com/token\",\n" +
                         "  \"auth_provider_x509_cert_url\": \"https://www.googleapis.com/oauth2/v1/certs\",\n" +
