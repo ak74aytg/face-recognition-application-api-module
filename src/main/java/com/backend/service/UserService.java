@@ -6,6 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -29,5 +33,30 @@ public class UserService {
         user.setToken(token);
         userRepository.save(user);
         return "Token updated successfully";
+    }
+
+    public List<Map<String, String>> getNotifications(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName());
+        return user.getUserNotifications();
+    }
+
+    public String deleteAllNotifications(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName());
+        user.setUserNotifications(new ArrayList<>());
+        userRepository.save(user);
+        return "Notifications deleted successfully";
+    }
+    public String deleteNotification(Principal principal, String notificationID){
+        User user = userRepository.findByEmail(principal.getName());
+        Map<String, String> deletedNotification = null;
+        for(Map<String, String> notification : user.getUserNotifications()){
+            if(notification.get("notifiation_id").equals(notificationID)){
+                deletedNotification = notification;
+                break;
+            }
+        }
+        user.getUserNotifications().remove(deletedNotification);
+        userRepository.save(user);
+        return "Notification deleted successfully";
     }
 }

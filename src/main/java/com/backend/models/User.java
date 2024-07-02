@@ -11,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -30,4 +31,6 @@ public class User {
     @DBRef
     @JsonIgnore
     private List<ImageData> savedImages = new ArrayList<>();
+    @JsonIgnore
+    private List<Map<String, String>> userNotifications = new ArrayList<>();
 }
