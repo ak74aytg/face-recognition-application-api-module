@@ -3,7 +3,6 @@ import com.backend.models.User;
 import com.backend.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.auth.oauth2.GoogleCredentials;
-import com.google.auth.oauth2.ServiceAccountCredentials;
 import com.google.firebase.messaging.*;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -14,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,8 +27,8 @@ public class NotificationService {
     @Autowired
     private UserRepository userRepository;
 
-    public void sendNotification(String location, Integer pincode, String message) throws IOException, FirebaseMessagingException {
-        Set<User> users = new HashSet<>(userRepository.findByLocation(location));
+    public void sendNotification(Integer pincode, String imageUrl, String message) throws IOException, FirebaseMessagingException {
+        Set<User> users = new HashSet<>();
         for (int i = pincode - 6; i < pincode + 7; i++) {
             users.addAll(userRepository.findByPincode(i));
         }
@@ -38,15 +36,15 @@ public class NotificationService {
         for (User user : users) {
             String deviceToken = user.getToken();
             if (deviceToken != null && !deviceToken.isEmpty()) {
-                sendPushNotification(deviceToken, message);
+                sendPushNotification(deviceToken, message, imageUrl);
             }
         }
     }
 
-    private void sendPushNotification(String deviceToken, String messageBody) {
+    private void sendPushNotification(String deviceToken, String messageBody, String imageUrl) {
         try {
             String firebaseAccessToken = getAccessToken();
-            String response = sendFcmMessage(firebaseAccessToken, deviceToken, messageBody);
+            String response = sendFcmMessage(firebaseAccessToken, deviceToken, messageBody, imageUrl);
             System.out.println(response +" res");
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -80,14 +78,14 @@ public class NotificationService {
     }
 
 
-    private String sendFcmMessage(String firebaseAccessToken, String DEVICE_TOKEN, String messages) throws IOException {
+    private String sendFcmMessage(String firebaseAccessToken, String DEVICE_TOKEN, String messages, String imageUrl) throws IOException {
         Map<String, Object> message = new HashMap<>();
         Map<String, Object> messageBody = new HashMap<>();
         Map<String, String> data = new HashMap<>();
         data.put("channelId", "default");
         data.put("title", "New person identified");
         data.put("message", messages);
-        data.put("body", "{\"ImageUrl\": \"lkfjdslijflf jewijliglknrew\"}");
+        data.put("body", "{\"ImageUrl\": \"" + imageUrl + "\"}");
         data.put("scopeKey", "@ayushbahuguna1122/App");
         data.put("experienceId", "@ayushbahuguna1122/App");
 
@@ -97,6 +95,8 @@ public class NotificationService {
 
         ObjectMapper objectMapper = new ObjectMapper();
         String jsonMessage = objectMapper.writeValueAsString(message);
+
+        System.out.println(jsonMessage);
 
         String url = "https://fcm.googleapis.com/v1/projects/" + FCM_PROJECT_NAME + "/messages:send";
         HttpPost httpPost = new HttpPost(url);
