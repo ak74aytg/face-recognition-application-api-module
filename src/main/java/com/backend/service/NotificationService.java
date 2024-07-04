@@ -1,5 +1,6 @@
 package com.backend.service;
 
+import com.backend.configuration.NotificationBuilder;
 import com.backend.models.User;
 import com.backend.repository.UserRepository;
 import com.google.auth.oauth2.GoogleCredentials;
@@ -7,6 +8,7 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -87,11 +89,13 @@ public class NotificationService {
         try {
             MulticastMessage message = MulticastMessage.builder()
                     .putData("channelId", "default")
-                    .putData("title", "New person identified")
-                    .putData("message", messageBody)
-                    .putData("body", "{\"ImageUrl\": \"" + imageUrl + "\"}")
                     .putData("scopeKey", "@ayushbahuguna1122/App")
                     .putData("experienceId", "@ayushbahuguna1122/App")
+                    .setNotification(NotificationBuilder.createNotification(
+                            "New person identified", // Title
+                            messageBody,             // Body
+                            imageUrl                 // Image URL
+                    ))
                     .addAllTokens(deviceTokens)
                     .build();
 
