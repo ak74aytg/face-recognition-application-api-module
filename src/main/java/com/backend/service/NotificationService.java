@@ -8,13 +8,13 @@ import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
-import com.google.firebase.messaging.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class NotificationService {
@@ -56,8 +56,11 @@ public class NotificationService {
 
     public void sendNotification(Integer pincode, String imageUrl, String message) throws IOException {
         Set<User> users = new HashSet<>();
-        for (int i = pincode - 6; i < pincode + 7; i++) {
-            users.addAll(userRepository.findByPincode(i));
+
+        List<Integer> pincodes = getPinQueue(pincode);
+
+        for (Integer integer : pincodes) {
+            users.addAll(userRepository.findByPincode(integer));
         }
 
         Map<String , String> notificationMessage = new HashMap<>();
@@ -85,6 +88,53 @@ public class NotificationService {
 
     }
 
+    private List<Integer> getPinQueue(Integer pincode) {
+        List<User> usersWithPincode = userRepository.findAllPincodes();
+        Set<Integer> pincodes = usersWithPincode.stream()
+                .map(User::getPincode)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        List<Integer> uniquePincodes = new ArrayList<>(pincodes);
+        Collections.sort(uniquePincodes);
+
+        int index = getIdx(uniquePincodes, pincode);
+        List<Integer> result = new ArrayList<>();
+
+        // Get previous 5 pincodes
+        for (int i = index - 5; i < index; i++) {
+            if (i >= 0) {
+                result.add(uniquePincodes.get(i));
+            }
+        }
+
+        // Get the current pincode and next 5 pincodes
+        for (int i = index; i <= index + 5 && i < uniquePincodes.size(); i++) {
+            result.add(uniquePincodes.get(i));
+        }
+
+        return result;
+    }
+
+
+    private int getIdx(List<Integer> uniquePincodes, Integer pincode) {
+        int start = 0;
+        int end = uniquePincodes.size() - 1;
+
+        while (start <= end) {
+            int mid = start + (end - start) / 2;
+            if (Objects.equals(uniquePincodes.get(mid), pincode)) {
+                return mid;
+            } else if (uniquePincodes.get(mid) > pincode) {
+                end = mid - 1;
+            } else {
+                start = mid + 1;
+            }
+        }
+        return start; // This returns the insertion point if the pincode is not found
+    }
+
+
     private void sendPushNotification(List<String> deviceTokens, String messageBody, String imageUrl) {
         try {
             MulticastMessage message = MulticastMessage.builder()
@@ -98,7 +148,7 @@ public class NotificationService {
                     ))
                     .addAllTokens(deviceTokens)
                     .build();
-
+            System.out.println(message);
             FirebaseMessaging.getInstance().sendMulticast(message);
 
         } catch (Exception e) {
