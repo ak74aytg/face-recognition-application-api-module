@@ -1,9 +1,5 @@
 package com.backend.service;
 
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -11,7 +7,6 @@ import java.util.UUID;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -72,6 +67,7 @@ public class AuthService {
 		loggedInUser.setPincode(user.getPincode());
 		loggedInUser.setLocation(user.getLocation());
 		loggedInUser.setToken(user.getToken());
+		System.out.println(user.getPassword());
 		map.put("user", loggedInUser);
         return new AuthResponse(token, map);
 	}
@@ -108,4 +104,10 @@ public class AuthService {
         return new UsernamePasswordAuthenticationToken(userDetails.getUsername(), userDetails.getPassword());
     }
 
+	public String changePassword(LoginRequest loginRequest) {
+		User user = userRepository.findByEmail(loginRequest.getEmail());
+		user.setPassword(passwordEncoder.encode(loginRequest.getPassword()));
+		userRepository.save(user);
+		return "password changed successfully";
+	}
 }

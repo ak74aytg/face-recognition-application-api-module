@@ -50,6 +50,10 @@ public class AuthController {
         
     }
 
-
+    @PostMapping("change/password")
+    public ResponseEntity<String> changePassword(@RequestBody LoginRequest loginRequest) throws Exception{
+        String response = authService.changePassword(loginRequest);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
+    }
     
 }
