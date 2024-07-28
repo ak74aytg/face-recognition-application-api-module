@@ -6,6 +6,8 @@ import com.backend.repository.UserRepository;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.google.firebase.messaging.MulticastMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -63,29 +67,31 @@ public class NotificationService {
             users.addAll(userRepository.findByPincode(integer));
         }
 
-        Map<String , String> notificationMessage = new HashMap<>();
+        Map<String, String> notificationMessage = new HashMap<>();
         notificationMessage.put("notifiation_id", UUID.randomUUID().toString());
         notificationMessage.put("title", "New person identified");
         notificationMessage.put("message", message);
         notificationMessage.put("body", "{\"ImageUrl\": \"" + imageUrl + "\"}");
 
+        // Add current date and time
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        notificationMessage.put("timestamp", now.format(formatter));
+
         List<String> deviceTokens = new ArrayList<>();
         List<User> userList = new ArrayList<>();
-        for(User user : users){
-            if(user.getToken()!=null && !user.getToken().isEmpty()){
+        for (User user : users) {
+            if (user.getToken() != null && !user.getToken().isEmpty()) {
                 deviceTokens.add(user.getToken());
             }
             userList.add(user);
             user.getUserNotifications().add(notificationMessage);
         }
 
-
         if (!deviceTokens.isEmpty()) {
             sendPushNotification(deviceTokens, message, imageUrl);
             userRepository.saveAll(userList);
         }
-
-
     }
 
     private List<Integer> getPinQueue(Integer pincode) {
@@ -137,20 +143,24 @@ public class NotificationService {
 
     private void sendPushNotification(List<String> deviceTokens, String messageBody, String imageUrl) {
         try {
+            AndroidConfig androidConfig = AndroidConfig.builder()
+                    .setPriority(AndroidConfig.Priority.HIGH)
+                    .setNotification(AndroidNotification.builder()
+                            .setTitle("New person identified")
+                            .setBody(messageBody)
+                            .setImage(imageUrl)
+                            .build())
+                    .build();
+
             MulticastMessage message = MulticastMessage.builder()
                     .putData("channelId", "default")
                     .putData("scopeKey", "@ayushbahuguna1122/App")
                     .putData("experienceId", "@ayushbahuguna1122/App")
-                    .setNotification(NotificationBuilder.createNotification(
-                            "New person identified", // Title
-                            messageBody,             // Body
-                            imageUrl                 // Image URL
-                    ))
+                    .setAndroidConfig(androidConfig)
                     .addAllTokens(deviceTokens)
                     .build();
-            System.out.println(message);
-            FirebaseMessaging.getInstance().sendMulticast(message);
 
+            FirebaseMessaging.getInstance().sendMulticast(message);
         } catch (Exception e) {
             System.out.println("Error sending push notifications: " + e.getMessage());
         }
