@@ -94,6 +94,33 @@ public class NotificationService {
         }
     }
 
+
+    public void sendNotification(User user, String imageUrl, String message) throws IOException {
+
+
+        Map<String, String> notificationMessage = new HashMap<>();
+        notificationMessage.put("notifiation_id", UUID.randomUUID().toString());
+        notificationMessage.put("title", "New person identified");
+        notificationMessage.put("message", message);
+        notificationMessage.put("body", "{\"ImageUrl\": \"" + imageUrl + "\"}");
+
+        // Add current date and time
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        notificationMessage.put("timestamp", now.format(formatter));
+
+        List<String> deviceTokens = new ArrayList<>();
+        if (user.getToken() != null && !user.getToken().isEmpty()) {
+            deviceTokens.add(user.getToken());
+        }
+        user.getUserNotifications().add(notificationMessage);
+
+        if (!deviceTokens.isEmpty()) {
+            sendPushNotification(deviceTokens, message, imageUrl);
+            userRepository.save(user);
+        }
+    }
+
     private List<Integer> getPinQueue(Integer pincode) {
         List<User> usersWithPincode = userRepository.findAllPincodes();
         Set<Integer> pincodes = usersWithPincode.stream()
