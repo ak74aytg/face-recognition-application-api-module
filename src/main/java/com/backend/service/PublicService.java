@@ -49,7 +49,7 @@ public class PublicService {
                 "folder", "temporary-images/"
         );
         String imageUrl = (String) cloudinary.uploader().upload(imageBytes, options).get("secure_url");
-        notificationService.sendNotification(pin, imageUrl , "New person found in "+loc);
+
         try {
             Path tempFile = Files.createTempFile("upload-", image.getOriginalFilename());
             image.transferTo(tempFile.toFile());
@@ -76,13 +76,14 @@ public class PublicService {
                         notificationService.sendNotification(imageData.getUser(), imageUrl, "The person you are looking for found in "+loc);
                     }
                 }
+                notificationService.sendNotification(pin, imageUrl , "New person found in "+loc);
                 return "Thank You for helping us!";
             } else {
                 return "Cannot identify the person in the picture!";
             }
         }catch (Exception e){
             e.printStackTrace();
-            return "No person found in the image!";
+            return "Cannot identify the person in the picture!";
         }
     }
 

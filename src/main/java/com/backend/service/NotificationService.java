@@ -100,7 +100,7 @@ public class NotificationService {
 
         Map<String, String> notificationMessage = new HashMap<>();
         notificationMessage.put("notifiation_id", UUID.randomUUID().toString());
-        notificationMessage.put("title", "New person identified");
+        notificationMessage.put("title", "Person identified");
         notificationMessage.put("message", message);
         notificationMessage.put("body", "{\"ImageUrl\": \"" + imageUrl + "\"}");
 
@@ -169,6 +169,7 @@ public class NotificationService {
 
 
     private void sendPushNotification(List<String> deviceTokens, String messageBody, String imageUrl) {
+//        System.out.println(messageBody);
         try {
             AndroidConfig androidConfig = AndroidConfig.builder()
                     .setPriority(AndroidConfig.Priority.HIGH)
@@ -187,7 +188,7 @@ public class NotificationService {
                     .addAllTokens(deviceTokens)
                     .build();
 
-            FirebaseMessaging.getInstance().sendMulticast(message);
+            FirebaseMessaging.getInstance().sendEachForMulticast(message);
         } catch (Exception e) {
             System.out.println("Error sending push notifications: " + e.getMessage());
         }
