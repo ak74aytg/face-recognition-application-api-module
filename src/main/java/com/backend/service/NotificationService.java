@@ -6,10 +6,7 @@ import com.backend.repository.UserRepository;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import com.google.firebase.messaging.AndroidConfig;
-import com.google.firebase.messaging.AndroidNotification;
-import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.MulticastMessage;
+import com.google.firebase.messaging.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -169,7 +166,6 @@ public class NotificationService {
 
 
     private void sendPushNotification(List<String> deviceTokens, String messageBody, String imageUrl) {
-//        System.out.println(messageBody);
         try {
             AndroidConfig androidConfig = AndroidConfig.builder()
                     .setPriority(AndroidConfig.Priority.HIGH)
@@ -188,7 +184,30 @@ public class NotificationService {
                     .addAllTokens(deviceTokens)
                     .build();
 
-            FirebaseMessaging.getInstance().sendEachForMulticast(message);
+            // Send the notification and capture response
+            BatchResponse response = FirebaseMessaging.getInstance().sendEachForMulticast(message);
+            System.out.println("Success: " + response.getSuccessCount());
+            System.out.println("Failure: " + response.getFailureCount());
+
+            // Iterate through the response and handle errors
+            List<String> invalidTokens = new ArrayList<>();
+            for (int i = 0; i < response.getResponses().size(); i++) {
+                SendResponse sendResponse = response.getResponses().get(i);
+                if (!sendResponse.isSuccessful()) {
+                    System.out.println("Error: " + sendResponse.getException().getMessage());
+                    if (sendResponse.getException().getMessage().contains("Requested entity was not found")) {
+                        // Collect invalid tokens
+                        invalidTokens.add(deviceTokens.get(i));
+                    }
+                }
+            }
+
+            // Remove invalid tokens from your database or list
+            if (!invalidTokens.isEmpty()) {
+                System.out.println("Invalid tokens: " + invalidTokens);
+                // You can implement your logic here to remove them from the database or handle them
+            }
+
         } catch (Exception e) {
             System.out.println("Error sending push notifications: " + e.getMessage());
         }
