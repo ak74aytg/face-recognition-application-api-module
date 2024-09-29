@@ -32,13 +32,22 @@ public class ImageController {
                                             @RequestParam("location") String location,
                                             @RequestParam("mobile") Long mobile,
                                             @RequestParam("image") MultipartFile file,
-                                            @RequestParam("pincode") Integer pincode)
+                                            @RequestParam("pincode") Integer pincode,
+                                            @RequestParam("missing-data") String missing_data,
+                                            @RequestParam("gender") String gender,
+                                            @RequestParam("station") String station,
+                                            @RequestParam("state") String state)
             throws Exception {
         ImageData imageData = new ImageData();
         imageData.setGuardian(guardian);
         imageData.setLocation(location);
         imageData.setMobile(mobile);
         imageData.setPincode(pincode);
+        imageData.setMissingData(missing_data);
+        imageData.setGender(gender);
+        imageData.setStation(station);
+        imageData.setState(state);
+        imageData.setStatus("unsolved");
         if (file == null || file.isEmpty()) {
             throw new IllegalAccessException("No image found");
         }

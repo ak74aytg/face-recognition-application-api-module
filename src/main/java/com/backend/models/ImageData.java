@@ -23,6 +23,11 @@ public class ImageData {
     private String location;
     private Integer pincode;
     private Long mobile;
+    private String missingData;
+    private String gender;
+    private String station;
+    private String state;
+    private String status;
     @DBRef
     private User user;
 }
